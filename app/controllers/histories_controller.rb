@@ -1,5 +1,7 @@
 class HistoriesController < ApplicationController
   before_action :set_history, only: [:show, :edit, :update, :destroy]
+  before_action :history_user, only: [:edit, :destroy]
+  before_action :authenticate_user!, except: [:index]
 
   # GET /histories
   # GET /histories.json
@@ -62,6 +64,13 @@ class HistoriesController < ApplicationController
   end
 
   private
+    def history_user
+      unless current_user.admin?
+        unless current_user.id == @history.user_id
+          redirect_to root_path
+        end
+      end
+    end
     # Use callbacks to share common setup or constraints between actions.
     def set_history
       @history = History.find(params[:id])
@@ -69,6 +78,6 @@ class HistoriesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def history_params
-      params.require(:history).permit(:title, :picture, :content, :remote_picture_url)
+      params.require(:history).permit(:title, :picture, :content, :remote_picture_url, :user_id)
     end
 end
